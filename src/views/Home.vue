@@ -1,5 +1,14 @@
 <template>
-  <div class="flex h-screen">
+  <div class="flex h-screen relative">
+    <!-- フィードバックボタン -->
+    <a
+      href="https://forms.gle/pj3aQeAf33UNTSeo6"
+      target="_blank"
+      class="fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition"
+    >
+      フィードバック
+    </a>
+
     <!-- 左：操作パネル -->
     <aside class="w-80 bg-gray-100 p-4 border-r overflow-y-auto">
       <h2 class="text-xl font-semibold mb-4">操作パネル</h2>
