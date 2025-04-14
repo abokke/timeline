@@ -50,47 +50,48 @@
       />
 
       <!-- 年表タイムライン -->
-      <div class="relative w-max min-w-full h-[600px]">
+      <div ref="timelineContainer" class="relative w-max min-w-full h-[600px]">
         <!-- 中央線 -->
-        <div class="absolute top-1/2 translate-y-8 left-0 w-full border-t-2 border-gray-300 z-0">
+        <div ref="timelineLine" class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 border-gray-300 z-0">
           <div
-            v-for="i in 10"
-            :key="i"
+            v-for="event in sortedEvents"
+            v-if="event && event.date && event.title"
+            :key="event.id"
             class="absolute h-8 border-l border-gray-400 -top-4"
-            :style="{ left: `${i * 120}px` }"
+            :style="{ left: `${(event.globalIndex + 1) * 120}px` }"
           >
-            <div v-if="sortedEvents.length > 0" class="text-xs text-gray-500 mt-8 -ml-6">{{ `Day ${i}` }}</div>
+            <div class="text-xs text-gray-500 mt-8 -ml-6">
+              {{ new Date(event.date).toLocaleDateString('ja-JP') }}
+            </div>
           </div>
         </div>
 
-        <!-- 上表示エリア -->
-        <div class="absolute top-0 w-full flex px-10 gap-20 justify-start">
+        <!-- 上表示エリア（2段構成） -->
+        <div class="absolute top-4 w-full">
           <div
-            v-for="event in topEvents"
+            v-for="event in topTier1Events"
             :key="event.id"
-            class="flex flex-col items-center"
-            :style="{ transform: `translateX(${event.globalIndex * 80}px)` }"
-          >
+            class="absolute flex flex-col-reverse items-center"
+            :style="{ left: `${(event.globalIndex + 1) * 120}px`, transform: 'translateX(-50%)' }"
+          ><div v-if="event && event.title">
             <EventCard
               :event="event"
               position="top"
               @update-event="updateEvent"
               @delete-event="deleteEvent(event.id)"
-            />
+            /></div>
           </div>
         </div>
-
-        <!-- 下表示エリア（中央線と被らないよう余白追加） -->
-        <div class="absolute bottom-0 w-full flex px-10 gap-20 justify-start pt-24">
+        <div class="absolute top-40 w-full">
           <div
-            v-for="event in bottomEvents"
+            v-for="event in topTier2Events"
             :key="event.id"
-            class="flex flex-col-reverse items-center"
-            :style="{ transform: `translateX(${event.globalIndex * 80}px)` }"
+            class="absolute flex flex-col-reverse items-center"
+            :style="{ left: `${(event.globalIndex + 1) * 120}px`, transform: 'translateX(-50%)' }"
           >
             <EventCard
               :event="event"
-              position="bottom"
+              position="top"
               @update-event="updateEvent"
               @delete-event="deleteEvent(event.id)"
             />
@@ -106,9 +107,7 @@ import EventCard from '@/components/EventCard.vue';
 
 export default {
   name: 'HomeLayout',
-  components: {
-    EventCard
-  },
+  components: { EventCard },
   data() {
     return {
       timelineTitle: '',
@@ -124,19 +123,21 @@ export default {
   },
   computed: {
     sortedEvents() {
-      let result = [...this.events];
-      if (this.sortKey === 'title') {
-        result.sort((a, b) => a.title.localeCompare(b.title));
-      } else {
-        result.sort((a, b) => new Date(a.date) - new Date(b.date));
-      }
-      return result.map((event, i) => ({ ...event, globalIndex: i }));
+      return this.events
+        .filter(e => e && e.title)
+        .sort((a, b) => {
+          if (this.sortKey === 'title') {
+            return a.title.localeCompare(b.title);
+          }
+          return new Date(a.date) - new Date(b.date);
+        })
+        .map((event, i) => ({ ...event, globalIndex: i }));
     },
-    topEvents() {
-      return this.sortedEvents.filter((_, i) => i % 2 === 0);
+    topTier1Events() {
+      return this.sortedEvents.filter((e, i) => e && e.title && i % 2 === 0);
     },
-    bottomEvents() {
-      return this.sortedEvents.filter((_, i) => i % 2 === 1);
+    topTier2Events() {
+      return this.sortedEvents.filter((e, i) => e && e.title && i % 2 === 1);
     }
   },
   methods: {
@@ -170,9 +171,13 @@ export default {
     }
   },
   mounted() {
-    const storedEvents = localStorage.getItem('events');
-    if (storedEvents) {
-      this.events = JSON.parse(storedEvents);
+    const stored = localStorage.getItem('events');
+    if (stored) {
+      try {
+        this.events = JSON.parse(stored).filter(e => e && e.title);
+      } catch (e) {
+        console.error('JSON parse error', e);
+      }
     }
   }
 };
