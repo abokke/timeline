@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: .
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules  # ✅ named volume に変更
+    environment:
+      - NODE_ENV=development
+
+volumes:
+  node_modules:
