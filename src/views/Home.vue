@@ -49,55 +49,67 @@
         class="text-3xl font-bold mb-6 w-full text-center border-b p-2 outline-none"
       />
 
-      <!-- 年表タイムライン -->
-      <div ref="timelineContainer" class="relative w-max min-w-full h-[600px]">
-        <!-- 中央線 -->
-        <div ref="timelineLine" class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 border-gray-300 z-0">
-          <div
-            v-for="event in sortedEvents"
-            v-if="event && event.date && event.title"
-            :key="event.id"
-            class="absolute h-8 border-l border-gray-400 -top-4"
-            :style="{ left: `${(event.globalIndex + 1) * 120}px` }"
-          >
-            <div class="text-xs text-gray-500 mt-8 -ml-6">
-              {{ new Date(event.date).toLocaleDateString('ja-JP') }}
-            </div>
-          </div>
-        </div>
+<!-- 年表タイムライン -->
+<div ref="timelineContainer" class="relative w-max min-w-full h-[600px]">
 
-        <!-- 上表示エリア（2段構成） -->
-        <div class="absolute top-4 w-full">
-          <div
-            v-for="event in topTier1Events"
-            :key="event.id"
-            class="absolute flex flex-col-reverse items-center"
-            :style="{ left: `${(event.globalIndex + 1) * 120}px`, transform: 'translateX(-50%)' }"
-          ><div v-if="event && event.title">
-            <EventCard
-              :event="event"
-              position="top"
-              @update-event="updateEvent"
-              @delete-event="deleteEvent(event.id)"
-            /></div>
-          </div>
-        </div>
-        <div class="absolute top-40 w-full">
-          <div
-            v-for="event in topTier2Events"
-            :key="event.id"
-            class="absolute flex flex-col-reverse items-center"
-            :style="{ left: `${(event.globalIndex + 1) * 120}px`, transform: 'translateX(-50%)' }"
-          >
-            <EventCard
-              :event="event"
-              position="top"
-              @update-event="updateEvent"
-              @delete-event="deleteEvent(event.id)"
-            />
-          </div>
-        </div>
-      </div>
+  <!-- 中央線 -->
+  <div ref="timelineLine" class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 border-gray-300 z-0"></div>
+
+  <!-- イベントごとの目盛り -->
+<!-- イベントごとの目盛り -->
+<div
+  v-for="event in sortedEvents"
+  :key="event.id"
+  class="absolute flex flex-col items-center z-0"
+  :style="{
+    left: `${(event.globalIndex + 1) * 120}px`,
+    top: '50%', // 中央線の位置に合わせる
+    transform: 'translate(-50%, 0%)'
+  }"
+>
+  <!-- 目盛り線（中央線の下に出る） -->
+  <div class="h-12 border-l border-gray-400"></div>
+
+  <!-- 日付ラベル（さらにその下） -->
+  <div class="text-xs text-gray-500 mt-1">
+    {{ new Date(event.date).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }) }}
+  </div>
+</div>
+
+  <!-- 上表示エリア（2段構成） -->
+  <div class="absolute top-4 w-full">
+    <div
+      v-for="event in topTier1Events"
+      :key="event.id"
+      class="absolute flex flex-col-reverse items-center"
+      :style="{ left: `${(event.globalIndex + 1) * 120}px`, transform: 'translateX(-50%)' }"
+    >
+      <EventCard
+        :event="event"
+        position="top"
+        @update-event="updateEvent"
+        @delete-event="deleteEvent(event.id)"
+      />
+    </div>
+  </div>
+
+  <div class="absolute top-40 w-full">
+    <div
+      v-for="event in topTier2Events"
+      :key="event.id"
+      class="absolute flex flex-col-reverse items-center"
+      :style="{ left: `${(event.globalIndex + 1) * 120}px`, transform: 'translateX(-50%)' }"
+    >
+      <EventCard
+        :event="event"
+        position="top"
+        @update-event="updateEvent"
+        @delete-event="deleteEvent(event.id)"
+      />
+    </div>
+  </div>
+
+</div>
     </main>
   </div>
 </template>
