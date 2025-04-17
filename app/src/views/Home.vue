@@ -36,26 +36,33 @@
         <label class="block mb-1 font-medium">サムネイルURL</label>
         <input v-model="newEvent.thumbnail" type="text" class="w-full p-2 border rounded mb-2" placeholder="https://example.com/image.jpg" />
 
-        <button @click="addEvent" class="w-full bg-blue-500 text-white p-2 rounded">追加</button>
+        <button @click="addEvent" class="w-full text-white p-2 rounded" :style="{ backgroundColor: themeColor || '#3b82f6' }">
+          追加
+        </button>
+      </div>
+      <div class="p-8">
+        <ImageUpload @image-selected="onImageSelected" />
+        <div v-if="selectedImage" class="mt-4">
+          <p class="text-sm text-gray-600">画像ファイル名: {{ selectedImage.file.name }}</p>
+        </div>
       </div>
     </aside>
 
     <!-- 右：年表表示エリア -->
-    <main class="flex-1 p-6 overflow-x-auto relative">
+    <main class="flex-1 p-6 overflow-x-auto relative" :style="{ backgroundColor: timelineTheme.background }">
       <input
         v-model="timelineTitle"
         type="text"
         placeholder="年表のタイトルを入力"
-        class="text-3xl font-bold mb-6 w-full text-center border-b p-2 outline-none"
+        class="text-3xl font-bold mb-6 w-full text-center border-b p-2 outline-none" :style="{ color: timelineTheme.text, backgroundColor: timelineTheme.background }"
       />
 
 <!-- 年表タイムライン -->
 <div ref="timelineContainer" class="relative w-max min-w-full h-[600px]">
 
   <!-- 中央線 -->
-  <div ref="timelineLine" class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 border-gray-300 z-0"></div>
+  <div ref="timelineLine" class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 border-gray-300 z-0" :style="{ borderColor: timelineTheme.line }"></div>
 
-  <!-- イベントごとの目盛り -->
 <!-- イベントごとの目盛り -->
 <div
   v-for="event in sortedEvents"
@@ -114,85 +121,99 @@
   </div>
 </template>
 
-<script>
-import EventCard from '@/components/EventCard.vue';
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import ImageUpload from '@/components/ImageUpload.vue'
+import EventCard from '@/components/EventCard.vue'
 
-export default {
-  name: 'HomeLayout',
-  components: { EventCard },
-  data() {
-    return {
-      timelineTitle: '',
-      newEvent: {
-        title: '',
-        description: '',
-        date: '',
-        thumbnail: ''
-      },
-      events: [],
-      sortKey: 'date'
-    };
-  },
-  computed: {
-    sortedEvents() {
-      return this.events
-        .filter(e => e && e.title)
-        .sort((a, b) => {
-          if (this.sortKey === 'title') {
-            return a.title.localeCompare(b.title);
-          }
-          return new Date(a.date) - new Date(b.date);
-        })
-        .map((event, i) => ({ ...event, globalIndex: i }));
-    },
-    topTier1Events() {
-      return this.sortedEvents.filter((e, i) => e && e.title && i % 2 === 0);
-    },
-    topTier2Events() {
-      return this.sortedEvents.filter((e, i) => e && e.title && i % 2 === 1);
+const timelineTitle = ref('')
+const sortKey = ref('date')
+const newEvent = ref({
+  title: '',
+  description: '',
+  date: '',
+  thumbnail: ''
+})
+const events = ref([])
+const selectedImage = ref(null)
+const timelineTheme = ref({
+  background: '#ffffff',
+  bubble: '#eeeeee',
+  line: '#cccccc',
+  text: '#000000'
+})
+const themeColor = ref('')
+
+function onImageSelected(data) {
+  selectedImage.value = data
+  const colors = data.palette || []
+
+  // 色数が少ない場合のフォールバック対応
+  const fallback = (i, def) => colors[i] ?? def
+
+  timelineTheme.value = {
+    background: fallback(0, '#ffffff'),
+    bubble:     fallback(1, fallback(0, '#eeeeee')),
+    line:       fallback(2, '#cccccc'),
+    text:       getReadableTextColor(colors[0]) // 背景に応じた可読色
+  }
+}
+
+function getReadableTextColor(rgbString) {
+  if (!rgbString) return '#000000'
+  const [r, g, b] = rgbString.match(/\d+/g).map(Number)
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b
+  return luminance < 128 ? '#ffffff' : '#000000'
+}
+
+function addEvent() {
+  if (newEvent.value.title && newEvent.value.description && newEvent.value.date) {
+    const event = {
+      id: Date.now(),
+      ...newEvent.value
     }
-  },
-  methods: {
-    addEvent() {
-      if (this.newEvent.title && this.newEvent.description && this.newEvent.date) {
-        const newEvent = {
-          id: Date.now(),
-          title: this.newEvent.title,
-          description: this.newEvent.description,
-          date: this.newEvent.date,
-          thumbnail: this.newEvent.thumbnail
-        };
-        this.events.push(newEvent);
-        localStorage.setItem('events', JSON.stringify(this.events));
-        this.newEvent.title = '';
-        this.newEvent.description = '';
-        this.newEvent.date = '';
-        this.newEvent.thumbnail = '';
-      }
-    },
-    updateEvent(updatedEvent) {
-      const index = this.events.findIndex(event => event.id === updatedEvent.id);
-      if (index !== -1) {
-        this.events.splice(index, 1, updatedEvent);
-        localStorage.setItem('events', JSON.stringify(this.events));
-      }
-    },
-    deleteEvent(id) {
-      this.events = this.events.filter(event => event.id !== id);
-      localStorage.setItem('events', JSON.stringify(this.events));
-    }
-  },
-  mounted() {
-    const stored = localStorage.getItem('events');
-    if (stored) {
-      try {
-        this.events = JSON.parse(stored).filter(e => e && e.title);
-      } catch (e) {
-        console.error('JSON parse error', e);
-      }
+    events.value.push(event)
+    localStorage.setItem('events', JSON.stringify(events.value))
+    newEvent.value = { title: '', description: '', date: '', thumbnail: '' }
+  }
+}
+
+function updateEvent(updatedEvent) {
+  const index = events.value.findIndex(event => event.id === updatedEvent.id)
+  if (index !== -1) {
+    events.value[index] = updatedEvent
+    localStorage.setItem('events', JSON.stringify(events.value))
+  }
+}
+
+function deleteEvent(id) {
+  events.value = events.value.filter(event => event.id !== id)
+  localStorage.setItem('events', JSON.stringify(events.value))
+}
+
+const sortedEvents = computed(() => {
+  return events.value
+    .filter(e => e && e.title)
+    .sort((a, b) => {
+      if (sortKey.value === 'title') return a.title.localeCompare(b.title)
+      return new Date(a.date) - new Date(b.date)
+    })
+    .map((event, i) => ({ ...event, globalIndex: i }))
+})
+
+const topTier1Events = computed(() => sortedEvents.value.filter((_, i) => i % 2 === 0))
+const topTier2Events = computed(() => sortedEvents.value.filter((_, i) => i % 2 === 1))
+
+onMounted(() => {
+  const stored = localStorage.getItem('events')
+  if (stored) {
+    try {
+      events.value = JSON.parse(stored).filter(e => e && e.title)
+    } catch (e) {
+      console.error('JSON parse error', e)
     }
   }
-};
+})
 </script>
 
 <style scoped>
