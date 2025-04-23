@@ -2,12 +2,31 @@
   <div>
     <!-- 吹き出し本体 -->
     <div
-      class="relative bg-blue-100 p-4 rounded-lg shadow-md max-w-xs group after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:border-8 after:border-transparent"
-      :class="{
-        'after:top-full after:border-t-blue-100': position === 'top',
-        'after:bottom-full after:border-b-blue-100': position === 'bottom'
-      }"
+      ref="bubble"
+      class="relative p-4 rounded-lg shadow-md max-w-xs group"
+      :style="{ backgroundColor: bubbleColor, color: textColor }"
     >
+      <!-- 三角（下付き） -->
+      <div
+        v-if="position === 'top'"
+        class="absolute left-1/2 -bottom-4 w-0 h-0"
+        :style="{
+          borderLeft: '16px solid transparent',
+          borderRight: '16px solid transparent',
+          borderTop: `16px solid ${bubbleColor}`,
+          transform: 'translateX(-50%)'
+        }"
+      />
+      <div
+        v-else
+        class="absolute left-1/2 -top-4 w-0 h-0"
+        :style="{
+          borderLeft: '16px solid transparent',
+          borderRight: '16px solid transparent',
+          borderBottom: `16px solid ${bubbleColor}`,
+          transform: 'translateX(-50%)'
+        }"
+      />
       <!-- 編集 & 削除 ボタン（ホバー時） -->
       <div
         class="absolute -top-8 right-0 bg-white border rounded px-2 py-1 shadow z-10 hidden group-hover:flex space-x-3"
@@ -43,49 +62,59 @@
 
       <!-- 通常表示 -->
       <template v-else>
-        <h3 class="font-bold text-lg">{{ event.title }}</h3>
-        <p class="text-sm text-gray-700">{{ event.description }}</p>
-        <p class="text-xs text-gray-500 mt-1">{{ formattedDate }}</p>
+        <h3 class="font-bold text-lg" :style="{ color: textColor }">{{ event.title }}</h3>
+        <p class="text-sm" :style="{ color: textColor }">{{ event.description }}</p>
+        <p class="text-xs mt-1" :style="{ color: textColor }">{{ formattedDate }}</p>
       </template>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'EventCard',
-  props: ['event', 'position'],
-  data() {
-    return {
-      isEditing: false,
-      editableEvent: { ...this.event }
-    };
+<script setup>
+import { ref, computed, watch } from 'vue'
+
+const props = defineProps({
+  event: Object,
+  position: String,
+  bubbleColor: {
+    type: String,
+    default: '#dbeafe' // ← Tailwindの bg-blue-100 に近い色
   },
-  watch: {
-    event(newVal) {
-      this.editableEvent = { ...newVal };
-    }
-  },
-  computed: {
-    formattedDate() {
-      const date = new Date(this.event.date);
-      return date.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    }
-  },
-  methods: {
-    startEditing() {
-      this.isEditing = true;
-    },
-    saveEdit() {
-      this.$emit('update-event', { ...this.editableEvent });
-      this.isEditing = false;
-    }
+  textColor: {
+    type: String,
+    default: '#000000'
   }
-};
+})
+
+const emit = defineEmits(['update-event', 'delete-event'])
+
+const isEditing = ref(false)
+const editableEvent = ref({ ...props.event })
+
+watch(
+  () => props.event,
+  (newVal) => {
+    editableEvent.value = { ...newVal }
+  }
+)
+
+const formattedDate = computed(() => {
+  const date = new Date(props.event.date)
+  return date.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})
+
+function startEditing() {
+  isEditing.value = true
+}
+
+function saveEdit() {
+  emit('update-event', { ...editableEvent.value })
+  isEditing.value = false
+}
 </script>
 
 <style scoped>
