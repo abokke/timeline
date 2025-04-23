@@ -15,11 +15,12 @@
       :selectedImage="selectedImage"
       :themeColor="themeColor"
       :theme="timelineTheme"
-      :themeChangedByUser="themeChangedByUser"
+      :locks="locks"
       @add-event="addEvent"
       @image-selected="onImageSelected"
       @update:sortKey="val => sortKey = val"
       @update-theme="handleThemeUpdate"
+      @update-locks="updateLocks"
     />
     <!-- 右：年表表示エリア -->
     <main class="flex-1 p-6 overflow-x-auto relative" :style="{ backgroundColor: timelineTheme.background }">
@@ -122,7 +123,7 @@ function toggleSection(key) {
   openSections.value[key] = !openSections.value[key]
 }
 
-const themeChangedByUser = reactive({
+const locks = reactive({
   background: false,
   bubble: false,
   line: false
@@ -133,14 +134,14 @@ function onImageSelected(data) {
   const colors = data.palette || []
   const fallback = (i, def) => colors[i] ?? def
 
-  if (!themeChangedByUser.background) {
+  if (!locks.background) {
     timelineTheme.value.background = fallback(0, '#ffffff')
     timelineTheme.value.text = getReadableTextColor(timelineTheme.value.background)
   }
-  if (!themeChangedByUser.bubble) {
+  if (!locks.bubble) {
     timelineTheme.value.bubble = fallback(1, timelineTheme.value.background)
   }
-  if (!themeChangedByUser.line) {
+  if (!locks.line) {
     timelineTheme.value.line = fallback(2, '#cccccc')
   }
 }
@@ -193,6 +194,10 @@ onMounted(() => {
 
 function handleThemeUpdate(newTheme) {
   timelineTheme.value = newTheme
+}
+
+function updateLocks(newLocks) {
+  Object.assign(locks, newLocks)
 }
 </script>
 

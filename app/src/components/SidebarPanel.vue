@@ -45,9 +45,10 @@
         <ColorThemeEditor
           :selectedImage="selectedImage"
           :theme="theme"
-          :themeChangedByUser="themeChangedByUser"
+          :locks="locks"
           @image-selected="$emit('image-selected', $event)"
           @update-theme="$emit('update-theme', $event)"
+          @update-locks="$emit('update-locks', $event)"
         />
       </div>
     </section>
@@ -83,14 +84,13 @@ const props = defineProps({
   selectedImage: Object,
   themeColor: String,
   theme: Object,
-  themeChangedByUser: Object
+  locks: Object
 })
 
-const emit = defineEmits(['add-event', 'image-selected', 'update:sortKey', 'update-theme'])
+const emit = defineEmits(['add-event', 'image-selected', 'update:sortKey', 'update-theme', 'update-locks'])
 const sortKeyProxy = ref(props.sortKey)
 
 watch(sortKeyProxy, val => emit('update:sortKey', val))
-
 
 
 const openSections = ref({ event: true, color: true, other: false })

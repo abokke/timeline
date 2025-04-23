@@ -14,3 +14,19 @@ export function getReadableTextColor(hex) {
     return luminance < 128 ? '#ffffff' : '#000000'
   }
   
+  /**
+   * rgb2hex
+   * @param {*} rgb 
+   * @returns hex
+   */
+  export function rgbToHex(rgb) {
+    if (!rgb.startsWith('rgb')) return rgb; // すでに hex の場合はそのまま返す
+  
+    const [r, g, b] = rgb.match(/\d+/g).map(Number)
+    return (
+      '#' +
+      [r, g, b]
+        .map(x => x.toString(16).padStart(2, '0'))
+        .join('')
+    )
+  }
