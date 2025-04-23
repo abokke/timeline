@@ -15,6 +15,7 @@
       :selectedImage="selectedImage"
       :themeColor="themeColor"
       :theme="timelineTheme"
+      :themeChangedByUser="themeChangedByUser"
       @add-event="addEvent"
       @image-selected="onImageSelected"
       @update:sortKey="val => sortKey = val"
@@ -25,14 +26,18 @@
       <input
         v-model="timelineTitle"
         type="text"
-        placeholder="年表のタイトルを入力"
+        placeholder="タイトルを入力"
         class="text-3xl font-bold mb-6 w-full text-center border-b p-2 outline-none"
         :style="{ color: timelineTheme.text, backgroundColor: timelineTheme.background }"
       />
 
       <!-- 年表タイムライン -->
       <div ref="timelineContainer" class="relative w-max min-w-full h-[600px]">
-        <div ref="timelineLine" class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 border-gray-300 z-0"></div>
+        <div
+          ref="timelineLine" 
+          class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 z-0"
+          :style="{ borderColor: timelineTheme.line }">
+        </div>
 
         <div
           v-for="event in sortedEvents"
@@ -44,8 +49,8 @@
             transform: 'translate(-50%, 0%)'
           }"
         >
-          <div class="h-12 border-l border-gray-400"></div>
-          <div class="text-xs text-gray-500 mt-1">
+          <div class="h-12 border-l" :style="{ borderLeftColor: timelineTheme.line }"></div>
+          <div class="text-xs mt-1" :style="{ color: timelineTheme.text }">
             {{ new Date(event.date).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }) }}
           </div>
         </div>
@@ -91,12 +96,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import ImageUpload from '@/components/ImageUpload.vue'
 import EventCard from '@/components/EventCard.vue'
 import SidebarPanel from '@/components/SidebarPanel.vue'
 import { getReadableTextColor } from '@/utils/color.js'
-
 
 const timelineTitle = ref('')
 const sortKey = ref('date')
@@ -118,15 +122,26 @@ function toggleSection(key) {
   openSections.value[key] = !openSections.value[key]
 }
 
+const themeChangedByUser = reactive({
+  background: false,
+  bubble: false,
+  line: false
+})
+
 function onImageSelected(data) {
   selectedImage.value = data
   const colors = data.palette || []
   const fallback = (i, def) => colors[i] ?? def
-  timelineTheme.value = {
-    background: fallback(0, '#ffffff'),
-    bubble: fallback(1, fallback(0, '#eeeeee')),
-    line: fallback(2, '#cccccc'),
-    text: getReadableTextColor(colors[0])
+
+  if (!themeChangedByUser.background) {
+    timelineTheme.value.background = fallback(0, '#ffffff')
+    timelineTheme.value.text = getReadableTextColor(timelineTheme.value.background)
+  }
+  if (!themeChangedByUser.bubble) {
+    timelineTheme.value.bubble = fallback(1, timelineTheme.value.background)
+  }
+  if (!themeChangedByUser.line) {
+    timelineTheme.value.line = fallback(2, '#cccccc')
   }
 }
 

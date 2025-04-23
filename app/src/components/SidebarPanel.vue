@@ -44,7 +44,8 @@
       <div v-if="openSections.color" class="p-4">
         <ColorThemeEditor
           :selectedImage="selectedImage"
-          :theme="themeRef"
+          :theme="theme"
+          :themeChangedByUser="themeChangedByUser"
           @image-selected="$emit('image-selected', $event)"
           @update-theme="$emit('update-theme', $event)"
         />
@@ -81,21 +82,16 @@ const props = defineProps({
   newEvent: Object,
   selectedImage: Object,
   themeColor: String,
-  theme: Object
+  theme: Object,
+  themeChangedByUser: Object
 })
 
 const emit = defineEmits(['add-event', 'image-selected', 'update:sortKey', 'update-theme'])
 const sortKeyProxy = ref(props.sortKey)
-const themeRef = props.theme
 
 watch(sortKeyProxy, val => emit('update:sortKey', val))
 
-watch(
-  () => props.theme,
-  (newVal) => {
-    themeRef.value = newVal
-  }
-)
+
 
 const openSections = ref({ event: true, color: true, other: false })
 function toggleSection(key) {

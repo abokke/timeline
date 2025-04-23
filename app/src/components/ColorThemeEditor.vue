@@ -26,12 +26,17 @@ const props = defineProps({
   theme: {
     type: Object,
     required: true
+  },
+  themeChangedByUser: { 
+    type: Object,
+    required: true
   }
 })
 
 const emit = defineEmits(['image-selected', 'update-theme'])
 
 function updateColor(key, value) {
+  props.themeChangedByUser[key] = true
   const updated = { ...props.theme, [key]: value }
 
   if (key === 'background') {
