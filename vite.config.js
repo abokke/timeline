@@ -4,7 +4,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // base: '/timeline/', 
+  // base: '/timeline/',  // MVP用
   base: '/', 
   plugins: [vue()],
   resolve: {

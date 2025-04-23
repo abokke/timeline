@@ -8,6 +8,7 @@ services:
     volumes:
       - .:/app
       - node_modules:/app/node_modules  # ✅ named volume に変更
+      - ./dist:/app/dist  # distフォルダをホストと共有
     environment:
       - NODE_ENV=development
 

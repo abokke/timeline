@@ -20,7 +20,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import ColorThief from 'colorthief'
+import ColorThief from 'color-thief-browser'
 
 const fileInput = ref(null)
 const imagePreview = ref(null)
