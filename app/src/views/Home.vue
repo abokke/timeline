@@ -1,14 +1,5 @@
 <template>
   <div class="flex h-screen relative">
-    <!-- フィードバックボタン -->
-    <a
-      href="https://forms.gle/pj3aQeAf33UNTSeo6"
-      target="_blank"
-      class="fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition"
-    >
-      ご意見・ご要望はこちら
-    </a>
-
     <SidebarPanel
       :sortKey="sortKey"
       :newEvent="newEvent"
@@ -23,17 +14,34 @@
       @update-locks="updateLocks"
     />
     <!-- 右：年表表示エリア -->
-    <main class="flex-1 p-6 overflow-x-auto relative" :style="{ backgroundColor: timelineTheme.background }">
-      <input
-        v-model="timelineTitle"
-        type="text"
-        placeholder="タイトルを入力"
-        class="text-3xl font-bold mb-6 w-full text-center border-b p-2 outline-none"
-        :style="{ color: timelineTheme.text, backgroundColor: timelineTheme.background }"
-      />
+    <!-- 操作ボタンバー -->
+    <div class="fixed top-4 right-4 z-50 flex space-x-2">
+      <button
+        @click="exportAsImage"
+        class="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 transition text-sm"
+      >
+        PNG出力
+      </button>
+      <a
+        href="https://forms.gle/pj3aQeAf33UNTSeo6"
+        target="_blank"
+        class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition text-sm"
+      >
+        ご意見・ご要望
+      </a>
+    </div>
+    <main ref="timelineContainer" class="flex-1 p-6 overflow-x-auto relative" :style="{ backgroundColor: timelineTheme.background }">
 
       <!-- 年表タイムライン -->
-      <div ref="timelineContainer" class="relative w-max min-w-full h-[600px]">
+      <div class="relative w-max min-w-full h-[600px]">
+        <input
+          v-model="timelineTitle"
+          type="text"
+          placeholder="タイトルを入力"
+          class="text-3xl font-bold mb-6 w-full text-center p-2 outline-none"
+          :style="{ color: timelineTheme.text, backgroundColor: timelineTheme.background }"
+        />
+
         <div
           ref="timelineLine" 
           class="absolute top-1/2 translate-y-8 left-[120px] w-full border-t-2 z-0"
@@ -102,6 +110,7 @@ import ImageUpload from '@/components/ImageUpload.vue'
 import EventCard from '@/components/EventCard.vue'
 import SidebarPanel from '@/components/SidebarPanel.vue'
 import { getReadableTextColor } from '@/utils/color.js'
+import { exportElementAsPng } from '@/utils/exportImage.js'
 
 const timelineTitle = ref('')
 const sortKey = ref('date')
@@ -109,6 +118,10 @@ const newEvent = ref({ title: '', description: '', date: '', thumbnail: '' })
 const events = ref([])
 const selectedImage = ref(null)
 const themeColor = ref('')
+const timelineContainer = ref(null)
+const exportAsImage = () => {
+  exportElementAsPng(timelineContainer.value, 'timeline.png')
+}
 
 const timelineTheme = ref({
   background: '#ffffff',

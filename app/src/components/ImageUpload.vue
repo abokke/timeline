@@ -20,7 +20,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import ColorThief from 'color-thief-browser'
+import ColorThief from 'colorthief'
 
 const fileInput = ref(null)
 const imagePreview = ref(null)
@@ -45,11 +45,12 @@ function handleFileChange(event) {
   reader.readAsDataURL(file)
 }
 
-function analyzePalette() {
+async function analyzePalette() {
   const img = previewImage.value
   if (!img || !img.complete) return
 
   try {
+    const { default: ColorThief } = await import('colorthief')
     const colorThief = new ColorThief()
     const palette = colorThief.getPalette(img, 5) // 最大5色取得
 

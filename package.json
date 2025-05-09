@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "color-thief-browser": "^2.0.2",
+    "colorthief": "^2.6.0",
+    "html2canvas": "^1.4.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
