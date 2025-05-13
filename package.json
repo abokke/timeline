@@ -7,7 +7,7 @@
     "tailwind:init": "tailwindcss init -p",
     "dev": "vite --host",
     "build": "vite build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "color-thief-browser": "^2.0.2",
