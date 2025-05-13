@@ -3,7 +3,7 @@
     <!-- 吹き出し本体 -->
     <div
       ref="bubble"
-      class="relative p-4 rounded-lg shadow-md max-w-xs group border"
+      class="relative p-4 rounded-lg shadow-md max-w-xs group"
       :style="{ backgroundColor: bubbleColor, color: textColor }"
     >
       <!-- 三角（下付き） -->

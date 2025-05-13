@@ -20,14 +20,15 @@
         @click="exportAsImage"
         class="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 transition text-sm"
       >
-        PNG出力
+        {{ t('export2png') }}
+        
       </button>
       <a
         href="https://forms.gle/pj3aQeAf33UNTSeo6"
         target="_blank"
         class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition text-sm"
       >
-        ご意見・ご要望
+        {{t ('feedback') }}
       </a>
     </div>
     <main ref="timelineContainer" class="flex-1 p-6 overflow-x-auto relative" :style="{ backgroundColor: timelineTheme.background }">
@@ -37,7 +38,7 @@
         <input
           v-model="timelineTitle"
           type="text"
-          placeholder="タイトルを入力"
+          :placeholder="t('titlePlaceholder')"
           class="text-3xl font-bold mb-6 w-full text-center p-2 outline-none"
           :style="{ color: timelineTheme.text, backgroundColor: timelineTheme.background }"
         />
@@ -119,6 +120,8 @@ const events = ref([])
 const selectedImage = ref(null)
 const themeColor = ref('')
 const timelineContainer = ref(null)
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const exportAsImage = () => {
   exportElementAsPng(timelineContainer.value, 'timeline.png')
 }
@@ -141,6 +144,19 @@ const locks = reactive({
   bubble: false,
   line: false
 })
+
+const sortedEvents = computed(() => {
+  return events.value
+    .filter(e => e && e.title)
+    .sort((a, b) => {
+      if (sortKey.value === 'title') return a.title.localeCompare(b.title)
+      return new Date(a.date) - new Date(b.date)
+    })
+    .map((event, i) => ({ ...event, globalIndex: i }))
+})
+
+const topTier1Events = computed(() => sortedEvents.value.filter((_, i) => i % 2 === 0))
+const topTier2Events = computed(() => sortedEvents.value.filter((_, i) => i % 2 === 1))
 
 function onImageSelected(data) {
   selectedImage.value = data
@@ -180,19 +196,6 @@ function deleteEvent(id) {
   events.value = events.value.filter(event => event.id !== id)
   localStorage.setItem('events', JSON.stringify(events.value))
 }
-
-const sortedEvents = computed(() => {
-  return events.value
-    .filter(e => e && e.title)
-    .sort((a, b) => {
-      if (sortKey.value === 'title') return a.title.localeCompare(b.title)
-      return new Date(a.date) - new Date(b.date)
-    })
-    .map((event, i) => ({ ...event, globalIndex: i }))
-})
-
-const topTier1Events = computed(() => sortedEvents.value.filter((_, i) => i % 2 === 0))
-const topTier2Events = computed(() => sortedEvents.value.filter((_, i) => i % 2 === 1))
 
 onMounted(() => {
   const stored = localStorage.getItem('events')

@@ -1,0 +1,36 @@
+{
+    "titlePlaceholder": "タイトルを入力",
+    "export2png": "PNG出力",
+    "feedback": "ご意見・ご要望はこちら",
+    "panel": {
+        "title": "操作パネル",
+        "eventInput": "イベント入力",
+        "sortOrder": "ソート順"
+    },
+    "sort": {
+        "date": "日付順"
+    },
+    "form": {
+        "title": "イベントのタイトル",
+        "description": "説明",
+        "date": "日付",
+        "dateFormatHint": "年 /月/日",
+        "thumbnail": "サムネイルURL"
+    },
+    "button": {
+        "add": "追加"
+    },
+    "section": {
+        "color": "カラー設定",
+        "displaySettings": "表示・その他設定",
+        "displayHint": "ここに今後の設定オプションが入ります。"
+    },
+    "upload": {
+        "prompt": "画像を選択してください"
+    },
+    "color": {
+        "background": "背景色",
+        "bubble": "吹き出し",
+        "line": "中央線"
+    }
+}

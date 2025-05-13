@@ -1,0 +1,36 @@
+{
+    "titlePlaceholder": "Enter a title",
+    "export2png": "Export PNG",
+    "feedback": "Feedback",
+    "panel": {
+        "title": "Control Panel",
+        "eventInput": "Event Input",
+        "sortOrder": "Sort Order"
+    },
+    "sort": {
+        "date": "By Date"
+    },
+    "form": {
+        "title": "Event Title",
+        "description": "Description",
+        "date": "Date",
+        "dateFormatHint": "YYYY / MM / DD",
+        "thumbnail": "Thumbnail URL"
+    },
+    "button": {
+        "add": "Add"
+    },
+    "section": {
+        "color": "Color Settings",
+        "displaySettings": "Display & Other Settings",
+        "displayHint": "Future setting options will be added here."
+    },
+    "upload": {
+        "prompt": "Please select an image"
+    },
+    "color": {
+        "background": "Background Color",
+        "bubble": "Speech Bubble",
+        "line": "Timeline Line"
+    }
+}
